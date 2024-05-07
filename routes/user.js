@@ -8,14 +8,20 @@ router.get('/signin' , (req , res)=>{
 
 router.post('/signin' , async(req , res)=>{
     const {email , password} = req.body
-    console.log('reached here!!!')
-    const user = await User.matchPassword(email , password)
-    console.log('reached second time!!!')
-    console.log(user)
 
-    console.log("User after authentication:" , user)
+    try {
+        const token = await User.matchPasswordAndGenerateToken(email , password)
+        console.log('token' , token)
 
-    return res.redirect('/')
+        return res.cookie('token' , token).redirect('/')
+
+    } catch (error) {
+        return res.render('signin' , {
+            error:'Invalid Password or Email'
+        })
+    }
+    
+    
 })
 
 router.get('/signup' , (req , res)=>{
@@ -32,6 +38,11 @@ router.post('/signup' , async(req , res)=>{
     })
     return res.redirect('/')
     
+})
+
+router.get('/logout' , (req , res)=>{
+    res.clearCookie('token').redirect('/')
+
 })
 
 module.exports = router
